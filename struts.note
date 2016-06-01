@@ -1,0 +1,96 @@
+struts2 : struts1 + xwork
+	简化代码，封装servlet
+
+开发流程:
+1.导入jar包(必需包)
+有关文件上传
+	commons-fileupload-1.2.2.jar
+	commons-io-2.0.1.jar
+struts核心包
+	struts2-core-2.3.4.1.jar
+xwork核心包
+	xwork-core-2.3.4.1.jar
+其他
+freemarker-2.3.19.jar
+javassist-3.11.0.GA.jar
+commons-lang3-3.1.jar
+ognl-3.0.5.jar
+
+2.配置核心过滤器
+	在web.xml中添加一个struts的核心过滤器
+	<filter>
+		<filter-name>struts2</filter-name>		
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+3.开发action类
+	一般情况下继承ActionSupport,Override execute 这个action处理的方法
+	public class LoginAction extends ActionSupport{
+		private User user;
+		public void setUser(User user){
+			this.user = user;
+		}
+		public User getUser(){
+			return user;
+		}
+		@Override
+		public String execute(){
+			//TODO
+		}
+	}
+	在Action类中添加bean和bean所对应的get，set方法，可以在收到请求时直接获取表单中的数据
+	在表单中的input标签的name属性要设置成相同的名字
+
+	<input type="text" name="user.username"/>
+	<input type="password" name="user.password" >
+	username 和 password 是User 类中相应的字段
+
+4.配置action
+	在项目src/目录下创建xml配置文件struts.xml
+	struts.xml中的内容
+	...省略xml头...
+
+	<struts>
+		<!--extends 一定要继承struts-default-->
+		<package name="任意" extends="struts-default">
+			<action name="请求的路径" class="Action类的全名" method="处理方法">
+				<result name="Action中处理方法可能的返回字符串" type="页面跳转的类型">/page.jsp</result>
+				...multi...
+			</action>
+			...multi...
+		</package>
+	</struts>
+	对属性的详解
+		package :
+			name : 包名，任意，但是不能重复
+			extends : 要继承的包,在struts中必须要继承struts-default,struts-default的定义在struts-default.xml配置文件中
+		action :
+			name : 请求路径的名称	
+				如请求路径为: http://localhost:8080/strutsDemo/login 
+				name 属性就应为login
+			class : 处理对应请求的Action类的全名(包括包名)
+			method : 处理的方法名，一般为execute
+		result : Action类中处理方法可能的返回字符串 such as "loginSucceed","loginFail"
+			每一个result 对应着一种结果，导向不同的页面
+			name : "loginSucceed" , "loginFail" 等
+			type : 跳转的类型,常见的有redirect(重定向),dispatcher(转发)
+			page : 要跳转到的页面
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
