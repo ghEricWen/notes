@@ -79,18 +79,159 @@ ognl-3.0.5.jar
 			type : 跳转的类型,常见的有redirect(重定向),dispatcher(转发)
 			page : 要跳转到的页面
 
+细节:
+	1.常量
+		在struts的一个配置文件,default.properties文件中，有默认配置的常量
+		如:struts.action.extension=action,,(配置action后可以跟的扩展名为action/不带扩展名)
+		修改:
+			在struts.xml配置文件中，在package之内,action的配置之前添加
+			<constant name="struts.action.extension" value="action,do,"/>(将可用扩展名改为action/do/不带扩展名)				
+	2.路径
+		配置action时可以使用通配符*和{n}来对action进行简化
+		如:
+			<action name="user_login" class="..." method="login">
+				<result name="success">/login_success.jsp</result>
+			</action>
+			<action name="user_register" class="..." method="register">
+				<result name="success">/register_success.jsp</result>
+			</action>
+
+			可简化为
+			<action name="user_*" class="..." method="{1}">
+				<result name="success">/{1}_success.jsp</result>
+			</action>
+
+			可以包含多个* , 用相对应的{n}来获取 , {1}对应第一个,{2}对应第二个
+	3.全局结果页面
+		在struts.xml配置文件，在package之内,action之前添加
+		<global-results>
+			<result></result>
+			<result></result>
+		</global-result>
 
 
+	4.类型转换
+		struts会在创建action类后，调用拦截其中包括对页面表单中的数据进行封装，即表单数据自动封装
+		在这个过程中需要对数据类型进行转化
+		String -> int ,String -> ...
+		其中String -> int 一类的struts以提供完备的转换
+		但如String -> java.util.Date 的只支持一种格式的日期类型(yyyy-MM-dd),需要对其进行扩展
+		自定义类型转换器
+			1.写类型转换器类
+				public class DateConverter extend StrutsTypeConverter{
+					@Override
+					public Object convertFromString(java.util.Map context,java.lang.String[] values,java.lang.Class toClass){
+						//Converter String to Object
+					}
+				}
+
+			2.要进行转换的Action类
+			public class ConvertAction extends ActionSupport{
+
+				private Date date;
+
+				private void setDate(){
+					this.date = date;
+				}
+
+				public String convert(){}
+			}
+			3.配置
+				局部类型转换器
+					在对应的action同包下创建properties文件
+					如: ConvertAction-conversion.properties (格式:对应的action类名-conversion.properties)
+					内容:
+						date=StrutsTypeConverter (格式:要进行转换的属性名=转换器类全名)									
+
+				全局类型转换器
+					在类路径(src)下创建固定文件xwork-conversion.properties
+					内容:
+						java.util.Date=StrutsTypeConverter (格式:要进行转化的类型=转换器类全名)
+	5.上传
+		struts使用fileupload拦截器对文件上传功能进行了实现
+		表单
+			<form action="..." method="POST" enctype="multipart/form-data">
+				<input type="file" name="myfile"><br/>
+				<input type="submit" value="upload">
+			</form>
+
+		action类
+			public class UploadAction extends ActionSupport{
+				//对应表单中的文件,属性名要与表单中的file名相同
+				private File myfile;
+
+				//获取文件的类型,属性名要在文件名的后面加上固定的ContentType
+				private String myfileContentType;
+
+				//获取文件的名称,FileName
+				private String myfileFileName;
+				
+				/**省略setter**/
+
+				public String upload() throws Exception{
+
+					//代码到此，文件上传已经完成，上传的文件保存在临时文件路径下
+					//以下代码将文件复制到WEB-INF/upload路径下
+					String dir = ServletActionContext.getActionContext().getRealName("/WEB-INF/upload");
+					File destFile = new File(dir,myfileFileName);
+					FileUtil.copyFile(myfile,destFile);
+					return "success";
+					//上传完成后临时目录下的对应文件会删除
+				}
 
 
+			}
 
+		配置临时目录
+			使用常量配置:struts.multipart.saveDir			
+			在struts.xml中
+			<constant name="struts.multipart.saveDir" value="/tmp"/>
 
+		配置上传文件大小限制
+			常量:struts.multipart.maxSize=2097152
+			在struts.xml中
+			<!--将上传大小限制设置为10m-->
+			<constant name="struts.multipart.maxSize" value="10485760"/> 
+	6.下载
+		action类:
+			public class DownloadAction extends ActionSupport {
 
+				//获取表单的fileName
+				private String fileName;
 
+				public void setFileName(String fileName) throws Exception{
+					//处理乱码
+					fileName = new String(fileName.getBytes("ISO-8859-1"),"UTF-8");
+					this.fileName = fileName;
+				}
 
+				public String download(){
+					return "download";
+				}
 
+				//提供文件流
+				public InputStream getFileInputStream(){
+					return ServletActionContext.getActionContext().getResoureAsStream("/WEB-INF/upload/" + fileName);
+				}
 
+				//提供下载的文件名
+				public String getDownloadFileName() throws Exception{
+					fileName = URLEncoder.encode(fileName,"UTF-8");
+					return fileName;
+				}
+			}
 
+			strtus.xml
+			<action name="download" class="DownloadAction" method="download">
+				<result name="download" type="stream">
+					<!--二进制类型-->
+					<param name="contentType">application/octet-stream</param>
+					<!--指定文件流,调用getFileInputStream()-->
+					<param name="inputName">fileInputStream</param>
 
-
-
+					<!--下载头，调用getDownloadFileName-->
+					<param name="contentDisposition">attachment;filename=${downloadFileName}</param>
+					<!--缓存区大小-->
+					<param name="bufferSize">1024</param>				
+				</result>
+			</action>
