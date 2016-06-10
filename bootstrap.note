@@ -1,0 +1,30 @@
+bootstrap class
+	container-fluid(div) : 使页面适应屏幕
+	img-responsive(img) : 使图片适应屏幕
+	button : 
+		btn : 创建bootstrap按钮
+		btn btn-block : 使按钮占据整行
+		btn btn-block btn-primary : 主按钮
+		btn btn-block btn-info : info按钮
+		btn btn-block btn-danger : danger按钮,红色 
+		为button设置icon :
+		引入css :
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+		用i标签表示icon , 要为按钮设置图标 ,则在button 标签内写i
+		<button class="btn btn-block btn-primary"><i class="fa fa-thumbs-up"></i>Like</button>
+		相关bootstrap类:
+			fa 
+			fa-thumbs-up
+			fa-info-circle
+			fa-trash
+			fa-paper-plane
+			要分别和fa组合使用
+			
+	text :
+		text-center(text) : 文本居中
+		text-primary : 主文本 
+		text-danger : 
+	col-xs-*/col-md-* (div) : 创建表格相关, *代表所占的列数
+		xs , md 指的是当前屏幕的大小
+
+	input :
