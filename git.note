@@ -1,0 +1,50 @@
+1.安装
+	在linux下,terminal输入命令: sudo apt-get install git
+2.配置
+	在使用之前要先配置用户名及邮箱
+	git config --global user.name <name>
+	git config --global user.mail <mail>
+3.使用
+	1)本地库
+		创建一个目录并设置为工作目录 :
+			mkdir gitnote 
+			cd gitnote
+		初始化git库 : 
+			git init
+		添加要保存到库中的文件
+			git add <file> [file file]
+		提交
+			git commit -m "commit"
+		显示log 
+			git log 
+		reset到上一版本
+			git reset --hard HEAD^
+		reset到上n个版本
+			git reset --hard HEAD~n
+		reset 到指定的版本(需要得到指定版本的版本号,git log 获得)
+			git reset --hard version_number
+		撤销对文件的更改(将文件恢复为最新版本的文件)
+			git checkout -- <filename>
+	2)远程库
+		生成ssh key (用于添加到github中)
+			ssh-keygen -t rsa -C "youremail@example.com"	
+			在/home/user目录下生成.ssh目录 将后缀为pub的文件中的内容粘贴到添加github 中添加public key 的位置
+		克隆远程库
+			git clone <git url>
+		将本地库与远程库形成关联
+			git remote add origin <git url>
+		将本地库(master分支)中的文件上传到对应的远程库		
+			git push -u origin master
+			-u参数的作用是关联
+
+	3)分支管理
+		查看分支
+			git branch 
+		新建分支
+			git branch <branch_name>
+		移到某分支
+			git checkout <branch_name>
+		和某分支融合
+			git merge dev --no-fast -m "commit"
+4.实际
+	在实际操作时,git 会有提示,应细读提示的内容,进而学习更好的使用git
